@@ -141,7 +141,6 @@ function generateImage() {
             if (data.error !== false) {
                 displayAscii("There was an error with API... <br>" + data.error, -1)
             } else {
-                ascii = data.ascii.replaceAll("<space>", "&nbsp;")
                 displayAscii(ascii, data.time)
             }
         })
