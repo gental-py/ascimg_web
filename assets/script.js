@@ -43,16 +43,31 @@ function outputBiggerContent() {
     outputContent = document.getElementById("output_content");
     computedStyle = window.getComputedStyle(outputContent);
     currentFontSize = parseFloat(computedStyle.fontSize);
-    if (isNaN(currentFontSize) || currentFontSize >= 18) {
-        return;
-    }
+    if (isNaN(currentFontSize) || currentFontSize >= 18) { return }
     outputContent.style.fontSize = (currentFontSize + 1) + "px";
 }
 
 function copyOutputContent() {
     content = document.getElementById("output_content").innerText
     if (content == "" || content == undefined) { return }
-    navigator.clipboard.writeText(content)
+
+    try {
+        navigator.clipboard.writeText(content)
+    } catch (error) {
+        console.error("Failed to copy output")
+        alert("Failed to copy...")
+    }
+}
+
+function downloadOutputContent() {
+    content = document.getElementById("output_content").innerText
+    if (content == "" || content == null || content == undefined) { return }
+    const blob = new Blob([content], { type: 'text/plain' });
+    const anchor = document.createElement('a');
+    anchor.href = URL.createObjectURL(blob);
+    anchor.download = "ascimg - generated output.txt";
+    anchor.click();
+    URL.revokeObjectURL(anchor.href);
 }
 
 function switchViewModeToImage(image) {
@@ -139,8 +154,9 @@ function generateImage() {
         .then(response => response.json())
         .then(data => {
             if (data.error !== false) {
-                displayAscii("There was an error with API... <br>" + data.error, -1)
+                displayAscii("There was an error with API... <br>", -1)
             } else {
+                ascii = data.ascii.replaceAll("<space>", "&nbsp;")
                 displayAscii(ascii, data.time)
             }
         })
@@ -148,7 +164,6 @@ function generateImage() {
             console.error(error);
             displayAscii("There was an error with JS... <br>" + error, -1)
         });
-
 }
 
 function updateValue(elementId, value) {
@@ -169,67 +184,38 @@ function initializeValues() {
     updateValue('mirror-checkbox', document.getElementById('mirror-checkbox').checked ? 'Enabled' : 'Disabled');
 }
 
-document.getElementById('image-scale').addEventListener('input', function () {
-    updateValue('image-scale', this.value);
-});
-
-document.getElementById('contrast-factor').addEventListener('input', function () {
-    updateValue('contrast-factor', this.value);
-});
-
-document.getElementById('brightness-factor').addEventListener('input', function () {
-    updateValue('brightness-factor', this.value);
-});
-
-document.getElementById('sharpness-factor').addEventListener('input', function () {
-    updateValue('sharpness-factor', this.value);
-});
-
-document.getElementById('solarize-factor').addEventListener('input', function () {
-    updateValue('solarize-factor', this.value);
-});
-
-document.getElementById('invert-checkbox').addEventListener('change', function () {
-    updateValue('invert-checkbox', this.checked ? 'Enabled' : 'Disabled');
-});
-
-document.getElementById('mirror-checkbox').addEventListener('change', function () {
-    updateValue('mirror-checkbox', this.checked ? 'Enabled' : 'Disabled');
-});
+document.getElementById('image-scale').addEventListener('input', function () { updateValue('image-scale', this.value); });
+document.getElementById('contrast-factor').addEventListener('input', function () { updateValue('contrast-factor', this.value); });
+document.getElementById('brightness-factor').addEventListener('input', function () { updateValue('brightness-factor', this.value); });
+document.getElementById('sharpness-factor').addEventListener('input', function () { updateValue('sharpness-factor', this.value); });
+document.getElementById('solarize-factor').addEventListener('input', function () { updateValue('solarize-factor', this.value); });
+document.getElementById('invert-checkbox').addEventListener('change', function () { updateValue('invert-checkbox', this.checked ? 'Enabled' : 'Disabled'); });
+document.getElementById('mirror-checkbox').addEventListener('change', function () { updateValue('mirror-checkbox', this.checked ? 'Enabled' : 'Disabled'); });
 
 initializeValues();
 
-
 function resetToDefault() {
-    // Reset image width
     document.getElementById('image-scale').value = 0.5;
     updateValue('image-scale', '0.5');
 
-    // Reset contrast factor
     document.getElementById('contrast-factor').value = 1.5;
     updateValue('contrast-factor', '1.5');
 
-    // Reset brightness factor
     document.getElementById('brightness-factor').value = 1.0;
     updateValue('brightness-factor', '1');
 
-    // Reset sharpness factor
     document.getElementById('sharpness-factor').value = 1.0;
     updateValue('sharpness-factor', '1');
 
-    // Reset solarize factor
     document.getElementById('solarize-factor').value = 0;
     updateValue('solarize-factor', '0');
 
-    // Reset invert checkbox
     document.getElementById('invert-checkbox').checked = false;
     updateValue('invert-checkbox', 'Disabled');
 
-    // Reset mirror checkbox
     document.getElementById('mirror-checkbox').checked = false;
     updateValue('mirror-checkbox', 'Disabled');
 
-    // Reset density scale
     document.getElementById('density-scale').value = "short";
 
     document.getElementById("custom-density").style.display = "none";
