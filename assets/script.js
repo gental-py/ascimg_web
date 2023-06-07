@@ -145,7 +145,7 @@ function generateImage() {
         .then(imageBlob => {
             const formData = new FormData();
             formData.append('file', imageBlob,);
-            url = API_CONVERT + "?settings=" + prepareSettings()
+            url = API_CONVERT + "?settings=" + prepareSettings() + "&web=true"
             return fetch(url, {
                 method: 'POST',
                 body: formData,
